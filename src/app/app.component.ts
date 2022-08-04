@@ -1,49 +1,37 @@
-import { Component, OnInit } from "@angular/core";
-import Nurbs from "nurbs";
-import * as fromJSON from "../assets/19-regression.result.json";
+import { Component, OnInit } from '@angular/core';
+import Nurbs from 'nurbs';
+import fromJSON from '../assets/19-regression.result.json';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  styleUrls: ['./app.component.scss'],
 })
-
-
 export class AppComponent implements OnInit {
-
   json = fromJSON;
 
-
-
+  points: number[][] = [];
 
   ngOnInit(): void {
-    console.log(this.json.linear);
-    this.testNurbs()
-
-
+    this.testNurbs();
   }
 
-  testNurbs(){
+  testNurbs() {
+    let splineX = this.json.linear[0];
+    let splineY = this.json.linear[1];
 
-    let points: number[][] = [];
-    // this.json.linear[0].vertices.forEach((v, i, a) => {
-    //   ?????
-    //   points.push(coord);
-    // })
-
-    console.log(points);
-
+    this.points = splineX.vertices.map((v, i) => [v, splineY.vertices[i]]);
 
     let curve = new Nurbs({
-        points: points,
-        degree: this.json.linear[0].curve_order,
-        knots: this.json.linear[0].knots,
-        boundary: 'closed',
-      });
+      points: this.points,
+      degree: splineX.curve_order - 1,
+      knots: [splineX.knots, splineY.knots],
+    });
 
-        console.log(curve.domain)
+    console.log(curve.evaluate([], 2));
 
-        // console.log(curve.evaluate([], 2))
+    let derivative = curve.evaluator(1);
 
+    console.log(derivative([], 2));
   }
 }
